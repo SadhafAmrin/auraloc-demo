@@ -1,0 +1,1009 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Auraloc FindOne Demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0f0b1a; --panel:#1E1530; --panel2:#2B2140; --line:#3a2e55;
+  --text:#ffffff; --muted:#a99fc4; --brand:#5B4690; --brand-soft:#DCCFF4;
+  --live:#3ddc97; --last:#f5b942; --off:#8a84a0; --danger:#ff5d73;
+  /* colour finish — overwritten per data-color */
+  --shell:#DCD2F2; --shade:#B6A6DE; --logo:#6F5BA7; --accent:#A58BE0; --wave:#4b2f86; --stage:#E9E2F8;
+}
+[data-color="black"]   {--shell:#26262a;--shade:#0c0c0e;--logo:#8d8d95;--accent:#8FB4EA;--wave:#26385a;--stage:#4a4a4f}
+[data-color="lavender"]{--shell:#DCD2F2;--shade:#B3A2DC;--logo:#6F5BA7;--accent:#A58BE0;--wave:#4b2f86;--stage:#E4DBF6}
+[data-color="blue"]    {--shell:#BBD5F3;--shade:#88AEDD;--logo:#4C74A8;--accent:#7FA9E3;--wave:#23406e;--stage:#D3E3F7}
+[data-color="pink"]    {--shell:#F3CDD6;--shade:#DB9FAF;--logo:#A0697A;--accent:#D79BB0;--wave:#6a2a45;--stage:#F5DDE3}
+[data-color="white"]   {--shell:#F6F6F8;--shade:#CACAD3;--logo:#8a8a93;--accent:#6E9BE0;--wave:#26365a;--stage:#ECECEF}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:var(--bg);color:var(--text);font-family:Outfit,system-ui,-apple-system,"Segoe UI",sans-serif;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+svg{display:block}
+
+/* ---------- top bar ---------- */
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:18px 32px;gap:16px;flex-wrap:wrap}
+.brand{display:flex;align-items:baseline;gap:14px}
+.brand .logo{font-weight:200;font-size:30px;letter-spacing:.5px}
+.brand .tag{color:var(--muted);font-size:13px;letter-spacing:2px;text-transform:uppercase}
+.badge-sim{font-size:12px;color:var(--last);border:1px solid #f5b94255;background:#f5b94214;padding:6px 12px;border-radius:99px;letter-spacing:.3px}
+
+/* ---------- stage ---------- */
+.stage{display:flex;justify-content:center;align-items:center;gap:72px;padding:4px 24px 90px;flex-wrap:wrap}
+.col{display:flex;flex-direction:column;align-items:center;gap:14px}
+.col-label{font-size:12px;letter-spacing:2.5px;text-transform:uppercase;color:var(--muted)}
+
+/* ---------- phone ---------- */
+.phone{width:360px;height:740px;border-radius:52px;background:#05040a;padding:12px;box-shadow:0 0 0 2px #2b2540,0 40px 90px #0009;position:relative}
+.phone.buzz{animation:buzz .08s linear 8}
+@keyframes buzz{0%{transform:translateX(-2px)}50%{transform:translateX(2px)}100%{transform:translateX(0)}}
+.screen{width:100%;height:100%;border-radius:42px;overflow:hidden;background:radial-gradient(120% 60% at 50% 0%,#2a1d48 0%,#120d1f 60%);position:relative;display:flex;flex-direction:column}
+.statusbar{height:44px;flex:none;display:flex;justify-content:space-between;align-items:center;padding:0 28px;font-size:14px;font-weight:600;position:relative;z-index:5}
+.statusbar .notch{position:absolute;left:50%;top:10px;width:96px;height:26px;background:#05040a;border-radius:20px;transform:translateX(-50%)}
+.statusbar .sb-r{display:flex;gap:6px;align-items:center}
+.tabs{flex:1;position:relative;overflow:hidden}
+.tab{position:absolute;inset:0;overflow-y:auto;padding:6px 18px 20px;display:none;scrollbar-width:none}
+.tab::-webkit-scrollbar{display:none}
+.tab.on{display:block;animation:fadein .25s ease}
+@keyframes fadein{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.nav{flex:none;height:74px;display:flex;justify-content:space-around;align-items:flex-start;padding-top:10px;background:#120d1fe6;border-top:1px solid #ffffff10}
+.nav button{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:11px;color:var(--muted);width:64px;position:relative}
+.nav button.on{color:var(--text)}
+.nav button.on svg{color:var(--accent)}
+.nav .dot{position:absolute;top:-2px;right:14px;width:9px;height:9px;border-radius:50%;background:var(--danger);display:none}
+.nav .dot.on{display:block}
+
+h2{font-size:22px;font-weight:500;margin:4px 0 14px}
+.sub{color:var(--muted);font-size:13px}
+.card{background:var(--panel);border:1px solid #ffffff0d;border-radius:20px;padding:14px 16px;margin-bottom:12px}
+.row{display:flex;align-items:center;gap:10px}
+.between{justify-content:space-between}
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:600;padding:4px 9px;border-radius:99px;letter-spacing:.3px}
+.pill i{width:7px;height:7px;border-radius:50%;display:block}
+.pill.live{background:#3ddc9722;color:var(--live)} .pill.live i{background:var(--live);box-shadow:0 0 0 0 var(--live);animation:ping 1.6s infinite}
+.pill.last{background:#f5b94222;color:var(--last)} .pill.last i{background:var(--last)}
+.pill.off{background:#ffffff14;color:var(--off)} .pill.off i{background:var(--off)}
+@keyframes ping{0%{box-shadow:0 0 0 0 #3ddc9788}100%{box-shadow:0 0 0 7px #3ddc9700}}
+
+/* home tab */
+.hero{display:flex;align-items:center;gap:14px;padding:16px}
+.mini-case{width:84px;height:80px;border-radius:24px 24px 20px 20px;background:linear-gradient(160deg,var(--shell) 40%,var(--shade));position:relative;flex:none;box-shadow:inset 0 -6px 12px #0002}
+.mini-case:before{content:"";position:absolute;left:0;right:0;top:24%;height:1px;background:#0002}
+.mini-case .ms{position:absolute;left:14px;right:14px;bottom:12px;height:34px;border-radius:8px;background:linear-gradient(160deg,#1a1430,#0b0a12);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600}
+.batts{display:flex;gap:12px;margin-top:8px}
+.batt{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;color:var(--muted)}
+.ring{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;font-size:10px;color:var(--text);font-weight:600}
+.ring span{width:31px;height:31px;border-radius:50%;background:var(--panel);display:grid;place-items:center}
+.locard{cursor:pointer}
+.locard .place{font-size:17px;font-weight:500;margin:6px 0 2px}
+.seg{display:flex;background:#0e0a18;border-radius:14px;padding:4px;gap:4px}
+.seg button{flex:1;padding:9px 4px;border-radius:10px;font-size:12px;color:var(--muted)}
+.seg button.on{background:var(--panel2);color:var(--text);box-shadow:inset 0 0 0 1px #ffffff12}
+.qa{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px}
+.qa button{background:var(--panel);border:1px solid #ffffff0d;border-radius:18px;padding:14px 6px;display:flex;flex-direction:column;align-items:center;gap:8px;font-size:12px}
+.qa button svg{color:var(--accent)}
+.qa button:active,.btn:active{transform:scale(.96)}
+.player .t{font-size:14px;font-weight:500}
+.prog{height:4px;background:#ffffff18;border-radius:4px;margin:10px 0 8px;overflow:hidden}
+.prog b{display:block;height:100%;background:var(--accent);width:30%}
+.ctrls{display:flex;justify-content:center;gap:22px;align-items:center}
+.ctrls .pp{width:42px;height:42px;border-radius:50%;background:var(--accent);color:#120d1f;display:grid;place-items:center}
+
+/* find tab */
+.mapwrap{position:relative;border-radius:22px;overflow:hidden;border:1px solid #ffffff12;margin-bottom:10px}
+.mapwrap .simtag{position:absolute;top:10px;left:10px;font-size:10px;font-weight:600;letter-spacing:.4px;background:#0f0b1acc;color:var(--last);padding:4px 8px;border-radius:8px}
+.mapwrap .legend{position:absolute;bottom:10px;right:10px;display:flex;gap:10px;font-size:10px;background:#0f0b1acc;padding:5px 9px;border-radius:8px;color:var(--muted)}
+.legend span{display:flex;align-items:center;gap:4px}.legend i{width:7px;height:7px;border-radius:50%}
+.chips{display:flex;gap:8px;margin-bottom:10px}
+.chips button{font-size:12px;padding:7px 12px;border-radius:99px;background:var(--panel);border:1px solid #ffffff12;color:var(--muted)}
+.chips button.on{background:var(--accent);color:#120d1f;border-color:transparent;font-weight:600}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:12px;border-radius:14px;font-size:13px;font-weight:600;flex:1}
+.btn.pri{background:var(--accent);color:#120d1f}
+.btn.sec{background:var(--panel2);color:var(--text)}
+.kv{display:flex;justify-content:space-between;font-size:13px;padding:7px 0;border-bottom:1px solid #ffffff0c}
+.kv:last-child{border:0}.kv span:first-child{color:var(--muted)}
+
+/* alerts */
+.alert-item{display:flex;gap:12px;align-items:flex-start}
+.alert-ic{width:36px;height:36px;border-radius:12px;display:grid;place-items:center;flex:none}
+.alert-item .t{font-size:14px;font-weight:500}.alert-item .b{font-size:12px;color:var(--muted);margin-top:2px}
+.alert-item .when{font-size:11px;color:var(--muted);margin-left:auto;white-space:nowrap}
+
+/* settings */
+.toggle{width:44px;height:26px;border-radius:99px;background:#ffffff22;position:relative;transition:.2s;flex:none}
+.toggle:after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:.2s}
+.toggle.on{background:var(--accent)}.toggle.on:after{left:21px}
+.set-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid #ffffff0c;font-size:14px}
+.set-row:last-child{border:0}.set-row small{display:block;color:var(--muted);font-size:11px;margin-top:2px}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.swatches{display:flex;gap:10px}
+.sw{width:30px;height:30px;border-radius:50%;border:2px solid transparent;box-shadow:inset 0 0 0 1px #0003}
+.sw.on{border-color:#fff}
+
+/* phone overlays */
+.banner{position:absolute;left:10px;right:10px;top:48px;visibility:hidden;z-index:20;background:#2a2040f2;backdrop-filter:blur(12px);border:1px solid #ffffff1a;border-radius:20px;padding:12px 14px;display:flex;gap:12px;align-items:center;transform:translateY(calc(-100% - 70px));transition:transform .35s cubic-bezier(.2,.9,.3,1.2),visibility 0s .35s;cursor:pointer}
+.banner.on{transform:none;visibility:visible;transition:transform .35s cubic-bezier(.2,.9,.3,1.2)}
+.banner .bi{width:38px;height:38px;border-radius:12px;background:var(--danger);display:grid;place-items:center;flex:none}
+.banner .bt{font-size:13px;font-weight:600}.banner .bb{font-size:12px;color:var(--muted);margin-top:2px}
+.sheet{position:absolute;inset:0;z-index:30;background:#0008;display:none;align-items:flex-end}
+.sheet.on{display:flex}
+.sheet .in{background:#1b1430;width:100%;border-radius:28px 28px 0 0;padding:20px 20px 30px;animation:up .3s ease}
+@keyframes up{from{transform:translateY(100%)}to{transform:none}}
+.bubble{padding:10px 14px;border-radius:16px;font-size:13px;margin:8px 0;max-width:85%}
+.bubble.me{background:var(--accent);color:#120d1f;margin-left:auto;border-bottom-right-radius:4px}
+.bubble.ai{background:var(--panel2);border-bottom-left-radius:4px}
+.mic{width:64px;height:64px;border-radius:50%;background:var(--accent);color:#120d1f;display:grid;place-items:center;margin:16px auto 6px;position:relative}
+.mic.listen:after{content:"";position:absolute;inset:-8px;border-radius:50%;border:2px solid var(--accent);animation:pulse 1.2s infinite}
+@keyframes pulse{from{transform:scale(.9);opacity:1}to{transform:scale(1.3);opacity:0}}
+.toast{position:absolute;left:50%;bottom:90px;transform:translateX(-50%) translateY(20px);background:#fff;color:#120d1f;font-size:12px;font-weight:600;padding:9px 14px;border-radius:99px;opacity:0;transition:.25s;z-index:25;white-space:nowrap}
+.toast.on{opacity:1;transform:translateX(-50%)}
+
+/* ---------- case ---------- */
+.case-stage{width:440px;height:520px;border-radius:36px;background:radial-gradient(80% 70% at 50% 40%,var(--stage),color-mix(in srgb,var(--stage) 82%,#1E1530));display:grid;place-items:center;transition:background .4s}
+.case{width:340px;height:330px;border-radius:78px 78px 66px 66px;background:linear-gradient(165deg,color-mix(in srgb,var(--shell) 85%,#fff) 0%,var(--shell) 35%,var(--shade) 100%);position:relative;box-shadow:inset 0 -14px 30px #0002,inset 0 8px 18px #fff5,0 30px 50px #0004;transition:background .4s}
+.case.shake{animation:shake .12s linear 10}
+@keyframes shake{0%{transform:rotate(-1.4deg)}50%{transform:rotate(1.4deg)}100%{transform:rotate(0)}}
+.case .seam{position:absolute;left:4px;right:4px;top:88px;height:2px;background:linear-gradient(90deg,transparent,#0002 10%,#0002 90%,transparent);border-radius:2px}
+.case .clogo{position:absolute;top:36px;width:100%;text-align:center;font-weight:300;font-size:30px;color:var(--logo);letter-spacing:.5px}
+.case .bezel{position:absolute;left:30px;right:30px;bottom:30px;height:192px;border-radius:30px;background:#050508;padding:9px;box-shadow:0 0 0 2px #0002}
+.cscreen{width:100%;height:100%;border-radius:22px;overflow:hidden;position:relative;background:#0b0915;user-select:none;touch-action:pan-y}
+.cscreen .wave{position:absolute;inset:0;background:
+  radial-gradient(120% 60% at 20% 110%,color-mix(in srgb,var(--wave) 90%,transparent),transparent 60%),
+  radial-gradient(90% 50% at 90% 80%,color-mix(in srgb,var(--wave) 70%,transparent),transparent 60%),
+  linear-gradient(180deg,#0b0915,#110d1f);transition:.4s}
+.cpages{position:absolute;inset:0;display:flex;transition:transform .35s cubic-bezier(.2,.8,.2,1)}
+.cpage{flex:0 0 100%;height:100%;padding:12px 16px 22px;position:relative;display:flex;flex-direction:column}
+.c-top{display:flex;justify-content:space-between;align-items:center;font-size:11px;font-weight:500}
+.c-top .r{display:flex;gap:4px;align-items:center}
+.c-time{font-size:40px;font-weight:400;text-align:center;line-height:1;margin-top:6px;letter-spacing:1px}
+.c-date{font-size:12px;text-align:center;margin-top:3px;color:#ffffffd9}
+.c-icons{display:flex;justify-content:center;gap:26px;margin-top:auto;align-items:center}
+.c-ic{width:44px;height:44px;border-radius:50%;background:#ffffff1a;display:grid;place-items:center;backdrop-filter:blur(4px)}
+.c-ic.main{width:52px;height:52px;background:var(--accent);color:#fff}
+.cdots{position:absolute;bottom:7px;left:0;right:0;display:flex;justify-content:center;gap:5px;z-index:4}
+.cdots i{width:5px;height:5px;border-radius:50%;background:#ffffff44;cursor:pointer}
+.cdots i.on{background:#fff}
+.c-title{font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:#ffffffa0;text-align:center}
+.c-song{text-align:center;margin-top:10px;font-size:15px;font-weight:500}
+.c-artist{text-align:center;font-size:11px;color:#ffffffa0}
+.c-prog{height:3px;background:#ffffff25;border-radius:3px;margin:10px 6px;overflow:hidden}.c-prog b{display:block;height:100%;background:var(--accent)}
+.c-ctrl{display:flex;justify-content:center;gap:22px;align-items:center}
+.c-ctrl .pp{width:40px;height:40px;border-radius:50%;background:#fff;color:#111;display:grid;place-items:center}
+.c-find{display:flex;gap:12px;align-items:center;margin-top:10px}
+.c-find .radar{width:64px;height:64px;border-radius:50%;border:1px solid #ffffff30;display:grid;place-items:center;position:relative;flex:none}
+.c-find .radar:before{content:"";position:absolute;inset:-1px;border-radius:50%;border:2px solid var(--accent);animation:pulse 1.6s infinite}
+.c-find .k{font-size:11px;color:#ffffffa0}.c-find .v{font-size:14px;font-weight:500}
+.c-cal{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;font-size:9px;text-align:center;margin-top:4px}
+.c-cal b{color:#ffffff80;font-weight:500}
+.c-cal span{padding:2px 0;border-radius:5px}.c-cal span.today{background:var(--accent);color:#fff;font-weight:600}
+.c-calc .disp{text-align:right;font-size:22px;padding:0 4px;height:26px;overflow:hidden}
+.c-calc .keys{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-top:4px}
+.c-calc .keys button{background:#ffffff14;border-radius:8px;font-size:12px;height:22px}
+.c-calc .keys button.op{background:var(--accent);color:#fff}
+.c-over{position:absolute;inset:0;z-index:6;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:14px;background:#0b0915f2}
+.c-over.on{display:flex;animation:fadein .2s}
+.c-over .big{font-size:16px;font-weight:600;margin-top:8px}.c-over .sm{font-size:11px;color:#ffffffb0;margin-top:3px}
+.c-over.alert{background:radial-gradient(circle at 50% 40%,#ff5d7344,#0b0915f2 70%)}
+.c-over.alert .ico{animation:blink 1s infinite}
+@keyframes blink{50%{opacity:.35}}
+.c-over .row2{display:flex;gap:30px;margin-top:12px}
+.c-set{display:flex;flex-direction:column;gap:5px;margin-top:6px;font-size:12px}
+.c-set div{display:flex;justify-content:space-between;align-items:center;background:#ffffff10;border-radius:8px;padding:5px 9px}
+.c-set button{font-size:11px;font-weight:600;color:var(--accent)}
+.case-hint{font-size:12px;color:var(--muted)}
+
+/* ---------- presenter dock ---------- */
+.dock{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);background:#1b1430f0;backdrop-filter:blur(14px);border:1px solid #ffffff18;border-radius:20px;padding:8px 10px;display:flex;gap:10px;white-space:nowrap;align-items:center;z-index:100;box-shadow:0 20px 50px #0008;flex-wrap:nowrap;justify-content:center;max-width:calc(100vw - 32px);transition:transform .3s,opacity .3s}
+.dock .lbl{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-right:2px}
+.dock .grp{display:flex;gap:6px;align-items:center}
+.dock .sc{font-size:12px;padding:7px 10px;border-radius:12px;background:#ffffff0d;border:1px solid #ffffff12;display:flex;gap:6px;align-items:center}
+.dock .sc kbd{font-family:inherit;font-size:10px;background:#ffffff1a;padding:1px 5px;border-radius:4px;color:var(--muted)}
+.dock .sc.on{background:var(--accent);color:#120d1f;border-color:transparent}
+.dock .sc.on kbd{background:#0002;color:#120d1f}
+.dock .sep{width:1px;height:28px;background:#ffffff18}
+.foot{position:fixed;right:16px;bottom:8px;font-size:10px;color:#ffffff40;z-index:1}
+
+@media (max-width:1100px){.dock{flex-wrap:wrap}}
+@media (max-width:900px){.stage{gap:36px}.case-stage{width:min(440px,calc(100vw - 32px))}}
+@media (max-width:420px){.topbar{padding:14px 16px}.phone{transform:scale(.9);transform-origin:top center;margin-bottom:-74px}}
+.dock .sw{width:24px;height:24px}
+@media (max-width:1320px){.dock{flex-wrap:wrap}}
+
+/* signal bars (Bluetooth strength — a rough band, never exact metres) */
+.bars{display:inline-flex;gap:2px;align-items:flex-end;height:12px;vertical-align:-1px;margin-right:6px}
+.bars i{width:3px;border-radius:1px;background:#ffffff2a}
+.bars i:nth-child(1){height:4px}.bars i:nth-child(2){height:6px}.bars i:nth-child(3){height:9px}.bars i:nth-child(4){height:12px}
+.bars i.on{background:var(--accent)}
+.proxline{font-size:13px;margin-top:6px;display:flex;align-items:center}
+.gpsline{display:flex;align-items:center}
+.gpsline svg{flex:none;margin:0 7px 0 1px;color:var(--accent)}
+@media (max-width:1600px){.foot{display:none}}
+
+/* find nearby sheet */
+.meter{display:flex;justify-content:center;align-items:flex-end;gap:8px;height:110px;margin:18px 0 10px}
+.meter i{width:22px;border-radius:6px;background:#ffffff18;transition:background .3s}
+.meter i:nth-child(1){height:25%}.meter i:nth-child(2){height:50%}.meter i:nth-child(3){height:75%}.meter i:nth-child(4){height:100%}
+.meter i.on{background:var(--accent);box-shadow:0 0 18px color-mix(in srgb,var(--accent) 60%,transparent)}
+.nb-band{text-align:center;font-size:22px;font-weight:500}
+.nb-hint{text-align:center;color:var(--accent);font-size:17px;font-weight:500;margin-top:4px;min-height:22px}
+.nb-note{text-align:center;color:#ffffff55;font-size:11px;margin-top:14px;line-height:1.4}
+
+/* case: device rows + "here" flash */
+.c-rows{display:flex;flex-direction:column;gap:4px;margin-top:6px;font-size:11px}
+.c-rows div{display:flex;justify-content:space-between;align-items:center;background:#ffffff10;border-radius:8px;padding:4px 9px}
+.c-rows b{font-weight:600}
+.c-rows button{font-size:10px;font-weight:600;color:var(--accent);margin-left:6px}
+.c-gps{font-size:10px;color:#ffffff90;text-align:center;margin-top:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.c-over.here{background:var(--accent);animation:flash 1s infinite}
+@keyframes flash{50%{background:#fff;color:#120d1f}}
+</style>
+</head>
+<body data-color="lavender">
+
+<header class="topbar">
+  <div class="brand"><span class="logo">Auraloc</span><span class="tag">Earpods + FindOne App</span></div>
+  <span class="badge-sim">UI concept demo · all locations are simulated, not live GPS</span>
+</header>
+
+<main class="stage">
+  <!-- ================= PHONE ================= -->
+  <section class="col">
+    <div class="col-label">FindOne app</div>
+    <div class="phone" id="phone">
+      <div class="screen">
+        <div class="statusbar"><span id="sbTime">10:24</span><span class="notch"></span><span class="sb-r" id="sbRight"></span></div>
+
+        <div class="banner" id="banner"><div class="bi" id="bannerIc"></div><div><div class="bt" id="bannerT"></div><div class="bb" id="bannerB"></div></div></div>
+        <div class="toast" id="toast"></div>
+
+        <div class="tabs">
+          <!-- HOME -->
+          <div class="tab on" id="tab-home">
+            <div class="row between" style="margin:4px 0 12px">
+              <div><div class="sub">Good to see you</div><h2 style="margin:2px 0 0">My Auraloc</h2></div>
+              <button class="c-ic" style="background:var(--panel2)" onclick="openAssistant()" title="Ask Auraloc" data-ic="mic"></button>
+            </div>
+
+            <div class="card hero">
+              <div class="mini-case"><div class="ms" id="miniTime">10:24</div></div>
+              <div style="flex:1">
+                <div style="font-weight:500">Auraloc Earpods</div>
+                <div class="batts" id="batts"></div>
+              </div>
+            </div>
+
+            <div class="card locard" onclick="goTab('find')">
+              <div class="row between"><span class="sub">Charging case location</span><span class="pill" id="homeCasePill"></span></div>
+              <div class="place" id="homeCasePlace">At Home</div>
+              <div class="proxline" id="homeCaseProx"></div>
+              <div class="sub gpsline" id="homeCaseMeta" style="margin-top:3px"></div>
+            </div>
+
+            <div class="qa">
+              <button onclick="goTab('find')"><span data-ic="pin"></span>Find</button>
+              <button onclick="playSound()"><span data-ic="sound"></span>Play sound</button>
+              <button onclick="toggleAntiTheft()"><span data-ic="shield"></span><span id="qaAT">Anti-theft on</span></button>
+            </div>
+
+            <div class="card">
+              <div class="sub" style="margin-bottom:8px">Sound</div>
+              <div class="seg" id="ancSeg">
+                <button data-anc="anc">Noise cancelling</button><button data-anc="amb">Ambient</button><button data-anc="off">Off</button>
+              </div>
+              <div class="set-row" style="padding-bottom:0"><div>Spatial audio<small>3D sound</small></div><button class="toggle on" id="tSpatial" onclick="toggleSpatial()"></button></div>
+            </div>
+
+            <div class="card player">
+              <div class="row between"><div><div class="t" id="pSong"></div><div class="sub" id="pArtist"></div></div><span class="sub">Now playing</span></div>
+              <div class="prog"><b id="pProg"></b></div>
+              <div class="ctrls"><button onclick="skip(-1)" data-ic="prev"></button><button class="pp" onclick="togglePlay()" id="pPlay"></button><button onclick="skip(1)" data-ic="next"></button></div>
+            </div>
+          </div>
+
+          <!-- FIND -->
+          <div class="tab" id="tab-find">
+            <h2 style="margin-bottom:10px">FindOne</h2>
+            <div class="chips" id="chips">
+              <button data-dev="case" class="on">Case</button><button data-dev="left">Left bud</button><button data-dev="right">Right bud</button>
+            </div>
+            <div class="mapwrap">
+              <svg id="map" viewBox="0 12 324 274" width="100%"></svg>
+              <span class="simtag">SIMULATED</span>
+              <div class="legend"><span><i style="background:var(--live)"></i>Live</span><span><i style="background:var(--last)"></i>Last known</span><span><i style="background:#5aa7ff"></i>You</span></div>
+            </div>
+            <div class="card">
+              <div class="row between"><div style="font-weight:500;font-size:16px" id="fName">Charging case</div><span class="pill" id="fPill"></span></div>
+              <div style="font-size:15px;margin-top:6px" id="fPlace"></div>
+              <div class="proxline" id="fProx"></div>
+              <div class="sub gpsline" id="fMeta" style="margin-top:3px"></div>
+              <div class="sub" id="fYou" style="margin-top:2px;color:#8fc3ff"></div>
+              <div class="row" style="margin-top:12px;gap:8px">
+                <button class="btn pri" onclick="primaryAction()"><span id="priIc"></span><span id="navLbl">Navigate</span></button>
+                <button class="btn sec" onclick="playSound()"><span data-ic="sound"></span>Play sound</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- ALERTS -->
+          <div class="tab" id="tab-alerts">
+            <h2>Alerts</h2>
+            <div id="alertList"></div>
+          </div>
+
+          <!-- SETTINGS -->
+          <div class="tab" id="tab-settings">
+            <h2>Settings</h2>
+            <div class="card">
+              <div class="set-row"><div>Anti-theft alert<small>Alert me if the case or an earbud is left behind</small></div><button class="toggle on" id="tAT" onclick="toggleAntiTheft()"></button></div>
+              <div class="set-row" style="display:block"><div class="row between"><span>Alert distance</span><b id="distLbl" style="font-weight:500">30 m</b></div><input type="range" min="10" max="200" step="10" value="30" id="distRange"></div>
+              <div class="set-row"><div>Disconnect alerts<small>Notify when Bluetooth drops</small></div><button class="toggle on" id="tDC" onclick="S.dcAlerts=!S.dcAlerts;render()"></button></div>
+            </div>
+            <div class="card">
+              <div class="sub" style="margin-bottom:6px">Saved places</div>
+              <div class="kv"><span>🏠 Home</span><span>Guindy</span></div>
+              <div class="kv"><span>💼 Office</span><span>Chennai Central</span></div>
+            </div>
+            <div class="card">
+              <div class="sub" style="margin-bottom:8px">Case colour &amp; screen theme</div>
+              <div class="swatches" id="appSwatches"></div>
+            </div>
+            <div class="card">
+              <div class="sub" style="margin-bottom:4px">About this device</div>
+              <div class="kv"><span>Bluetooth</span><span>5.4</span></div>
+              <div class="kv"><span>Battery (case + buds)</span><span>72 h target</span></div>
+              <div class="kv"><span>Charging</span><span>USB-C</span></div>
+              <div class="kv"><span>Water resistance</span><span>IPX5</span></div>
+              <div class="kv"><span>Price</span><span>₹15,999 MRP</span></div>
+              <div class="kv"><span>Firmware</span><span>Concept demo</span></div>
+            </div>
+          </div>
+        </div>
+
+        <nav class="nav" id="nav">
+          <button data-tab="home" class="on"><span data-ic="home"></span>Home</button>
+          <button data-tab="find"><span data-ic="pin"></span>Find</button>
+          <button data-tab="alerts"><span data-ic="bell"></span>Alerts<i class="dot" id="alertDot"></i></button>
+          <button data-tab="settings"><span data-ic="gear"></span>Settings</button>
+        </nav>
+
+        <!-- assistant sheet -->
+        <div class="sheet" id="assistant" onclick="if(event.target===this)closeAssistant()">
+          <div class="in">
+            <div class="row between"><b style="font-weight:500">Auraloc Assistant</b><span class="pill off" style="font-size:10px">ROADMAP · PHONE-LINKED</span></div>
+            <div id="chat" style="min-height:130px;margin-top:10px"></div>
+            <div class="chips" style="flex-wrap:wrap;justify-content:center;margin:10px 0 0" id="askChips">
+              <button onclick="runAssistant(0)">Remind me at 9 PM</button><button onclick="runAssistant(1)">Find my case</button><button onclick="runAssistant(2)">Play music</button>
+            </div>
+            <button class="mic" id="micBtn" onclick="runAssistant(0)" data-ic="mic"></button>
+            <div class="sub" style="text-align:center" id="micHint">Tap a command or the mic</div>
+          </div>
+        </div>
+
+        <!-- find nearby sheet -->
+        <div class="sheet" id="nearby" onclick="if(event.target===this)closeNearby()">
+          <div class="in">
+            <div class="row between"><b style="font-weight:500;font-size:17px" id="nbName">Find nearby</b><button class="sub" onclick="closeNearby()">Done</button></div>
+            <div class="sub" id="nbPlace" style="margin-top:2px"></div>
+            <div class="meter" id="nbMeter"><i></i><i></i><i></i><i></i></div>
+            <div class="nb-band" id="nbBand"></div>
+            <div class="nb-hint" id="nbHint"></div>
+            <div class="row" style="margin-top:16px"><button class="btn pri" onclick="playSound(S.nearby.id)"><span data-ic="sound"></span>Play sound</button></div>
+            <div class="nb-note">Distance is estimated from Bluetooth signal strength and can vary through walls.<br>Demo: simulates you walking towards it.</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= CASE ================= -->
+  <section class="col">
+    <div class="col-label">Touchscreen case</div>
+    <div class="case-stage">
+      <div class="case" id="case">
+        <div class="clogo">Auraloc</div>
+        <div class="seam"></div>
+        <div class="bezel">
+          <div class="cscreen" id="cscreen">
+            <div class="wave"></div>
+            <div class="cpages" id="cpages">
+              <!-- 0 Home -->
+              <div class="cpage">
+                <div class="c-top"><span data-ic="bt" data-s="13"></span><span class="r"><span data-ic="batt" data-s="18"></span><span id="cBatt">100%</span></span></div>
+                <div class="c-time" id="cTime">10:24</div>
+                <div class="c-date" id="cDate">Mon, 26 May</div>
+                <div class="c-icons">
+                  <button class="c-ic" onclick="caseGo(1)" data-ic="music"></button>
+                  <button class="c-ic main" onclick="caseGo(2)" data-ic="flower" data-s="26"></button>
+                  <button class="c-ic" onclick="caseSettings(true)" data-ic="gear"></button>
+                </div>
+              </div>
+              <!-- 1 Music -->
+              <div class="cpage">
+                <div class="c-title">Music</div>
+                <div class="c-song" id="cSong"></div>
+                <div class="c-artist" id="cArtist"></div>
+                <div class="c-prog"><b id="cProg"></b></div>
+                <div class="c-ctrl"><button onclick="skip(-1)" data-ic="prev"></button><button class="pp" onclick="togglePlay()" id="cPlay"></button><button onclick="skip(1)" data-ic="next"></button></div>
+              </div>
+              <!-- 2 FindOne -->
+              <div class="cpage">
+                <div class="c-title">FindOne</div>
+                <div class="c-rows">
+                  <div><span>Phone</span><span><b id="cfPhone"></b><button onclick="ringPhone()">Ring</button></span></div>
+                  <div><span>Left earbud</span><b id="cfLeft"></b></div>
+                  <div><span>Right earbud</span><b id="cfRight"></b></div>
+                </div>
+                <div class="c-gps" id="cfLoc"></div>
+              </div>
+              <!-- 3 Calendar -->
+              <div class="cpage">
+                <div class="c-title" id="cCalTitle">Calendar</div>
+                <div class="c-cal" id="cCal"></div>
+              </div>
+              <!-- 4 Calculator -->
+              <div class="cpage c-calc">
+                <div class="disp" id="calcDisp">0</div>
+                <div class="keys" id="calcKeys"></div>
+              </div>
+            </div>
+            <div class="cdots" id="cdots"></div>
+
+            <!-- overlays -->
+            <div class="c-over" id="cSettings">
+              <div class="c-title" style="width:100%">Settings</div>
+              <div class="c-set" style="width:100%">
+                <div><span>Noise control</span><button onclick="cycleAnc()" id="cAnc"></button></div>
+                <div><span>3D sound</span><button onclick="toggleSpatial()" id="cSpatial"></button></div>
+                <div><span>Anti-theft</span><button onclick="toggleAntiTheft()" id="cAT"></button></div>
+                <div><span>Theme</span><button onclick="cycleColor()" id="cTheme"></button></div>
+              </div>
+              <button style="margin-top:8px;font-size:11px;color:#ffffffb0" onclick="caseSettings(false)">‹ Back</button>
+            </div>
+            <div class="c-over alert" id="cAlert">
+              <span class="ico" data-ic="shield" data-s="30" style="color:var(--danger)"></span>
+              <div class="big">Phone out of range</div>
+              <div class="sm">Owner alerted · sharing location to FindOne</div>
+            </div>
+            <div class="c-over here" id="cHere">
+              <span data-ic="flower" data-s="34"></span>
+              <div class="big">Here!</div>
+              <div class="sm" style="color:inherit">Screen lit by Find nearby</div>
+            </div>
+            <div class="c-over" id="cSound">
+              <span class="ico" data-ic="sound" data-s="30" style="color:var(--accent)"></span>
+              <div class="big">Playing sound</div>
+              <div class="sm">Requested from FindOne</div>
+              <button style="margin-top:10px;font-size:11px;font-weight:600;color:var(--accent)" onclick="stopSound()">Stop</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="case-hint">Tap the icons · swipe or tap the dots to change page</div>
+  </section>
+</main>
+
+<!-- ================= PRESENTER DOCK ================= -->
+<div class="dock" id="dock">
+  <div class="grp">
+    <button class="sc" data-sc="home"><kbd>1</kbd>At home</button>
+    <button class="sc" data-sc="train"><kbd>2</kbd>On the train</button>
+    <button class="sc" data-sc="left"><kbd>3</kbd>Case left on train</button>
+    <button class="sc" data-sc="lost"><kbd>4</kbd>Signal lost</button>
+    <button class="sc" data-sc="bud"><kbd>5</kbd>Earbud dropped</button>
+  </div>
+  <div class="sep"></div>
+  <div class="grp"><div class="swatches" id="dockSwatches" style="gap:6px"></div></div>
+</div>
+<div class="foot">Kaushik Electronic Gadgets · Hear Freely. Find Instantly.</div>
+
+<script>
+/* ---------------- icons ---------------- */
+const P = {
+  bt:'<path d="M7 7l10 10-5 5V2l5 5L7 17"/>',
+  batt:'<rect x="2" y="7" width="17" height="10" rx="2"/><path d="M22 11v2"/><rect x="4" y="9" width="13" height="6" rx="1" fill="currentColor" stroke="none"/>',
+  music:'<path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>',
+  gear:'<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>',
+  flower:'<circle cx="12" cy="12" r="2.2" fill="currentColor"/><g fill="currentColor" stroke="none"><ellipse cx="12" cy="5.5" rx="2.2" ry="3"/><ellipse cx="12" cy="18.5" rx="2.2" ry="3"/><ellipse cx="5.5" cy="12" rx="3" ry="2.2"/><ellipse cx="18.5" cy="12" rx="3" ry="2.2"/><ellipse cx="7.4" cy="7.4" rx="2.2" ry="3" transform="rotate(-45 7.4 7.4)"/><ellipse cx="16.6" cy="16.6" rx="2.2" ry="3" transform="rotate(-45 16.6 16.6)"/><ellipse cx="16.6" cy="7.4" rx="2.2" ry="3" transform="rotate(45 16.6 7.4)"/><ellipse cx="7.4" cy="16.6" rx="2.2" ry="3" transform="rotate(45 7.4 16.6)"/></g>',
+  play:'<path d="M7 4l13 8-13 8z" fill="currentColor"/>',
+  pause:'<rect x="6" y="4" width="4" height="16" rx="1" fill="currentColor"/><rect x="14" y="4" width="4" height="16" rx="1" fill="currentColor"/>',
+  next:'<path d="M5 4l10 8-10 8z" fill="currentColor"/><path d="M19 5v14"/>',
+  prev:'<path d="M19 20L9 12l10-8z" fill="currentColor"/><path d="M5 19V5"/>',
+  home:'<path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/>',
+  pin:'<path d="M12 22s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 12 7 12z"/><circle cx="12" cy="10" r="2.5"/>',
+  bell:'<path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/>',
+  sound:'<path d="M11 5L6 9H2v6h4l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M19 5a10 10 0 0 1 0 14"/>',
+  shield:'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/>',
+  nav:'<path d="M3 11l19-9-9 19-2-8z" fill="currentColor"/>',
+  radar:'<circle cx="12" cy="12" r="2" fill="currentColor"/><path d="M16.2 7.8a6 6 0 0 1 0 8.4M7.8 16.2a6 6 0 0 1 0-8.4M19 5a10 10 0 0 1 0 14M5 19A10 10 0 0 1 5 5"/>',
+  mic:'<rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0M12 17v5"/>',
+  wifi:'<path d="M5 12.5a10 10 0 0 1 14 0M8.5 16a5 5 0 0 1 7 0"/><circle cx="12" cy="19.5" r="1" fill="currentColor"/>',
+  gps:'<circle cx="12" cy="12" r="6.5"/><circle cx="12" cy="12" r="2" fill="currentColor"/><path d="M12 2v3.5M12 18.5V22M2 12h3.5M18.5 12H22"/>',
+  signal:'<path d="M4 20v-3M9 20v-7M14 20V9M19 20V4"/>',
+  unlink:'<path d="M9 17H7A5 5 0 0 1 7 7M15 7h2a5 5 0 0 1 4 8M8 12h3M3 3l18 18"/>',
+};
+const ic = (n, s=20) => `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${P[n]}</svg>`;
+function paintIcons(root=document){ root.querySelectorAll('[data-ic]').forEach(el=>{ if(!el.dataset.done){ el.insertAdjacentHTML('afterbegin', ic(el.dataset.ic, +(el.dataset.s||20))); el.dataset.done=1; }}); }
+
+/* ---------------- data ---------------- */
+const COLORS = { black:{name:'Black',hex:'#1d1d20'}, lavender:{name:'Lavender',hex:'#CDBFF0'}, blue:{name:'Sky Blue',hex:'#A9C8EE'}, pink:{name:'Blush Pink',hex:'#F1C3CE'}, white:{name:'White',hex:'#F4F4F6'} };
+const TRACKS = [ {t:'Kannazhaga',a:'Anirudh Ravichander',d:214}, {t:'Vaathi Coming',a:'Anirudh Ravichander',d:228}, {t:'Munbe Vaa',a:'A. R. Rahman',d:356} ];
+const DEV = { case:{name:'Charging case',short:'Case',batt:100}, left:{name:'Left earbud',short:'Left bud',batt:86}, right:{name:'Right earbud',short:'Right bud',batt:84} };
+const M_PER_UNIT = 32;   // map units → metres
+const BT_LIMIT = 20;     // beyond this (effective metres) Bluetooth is treated as out of range
+
+const S = {
+  color:'lavender', scenario:'home', tab:'home', casePage:0, sel:'case',
+  playing:false, track:0, pos:52, anc:'anc', spatial:true, antiTheft:true, dcAlerts:true, alertDist:30,
+  user:{x:0,y:0}, caseT:0, caseXY:null, caseFollow:false, moving:false,
+  dev:{ case:{state:'live',indoor:1}, left:{where:'docked'}, right:{where:'docked'} },
+  lastSeenAt:null, alerted:{}, dcLogged:{}, nav:false, nearby:null, budSound:null,
+  sound:false, alerts:[], unread:false, calc:'0',
+};
+
+/* ---------------- map ---------------- */
+const map = document.getElementById('map');
+map.innerHTML = `
+  <rect width="324" height="300" fill="#19122b"/>
+  <path d="M250 0 C 270 60 300 90 324 110 V0Z" fill="#1c2546"/>
+  <path d="M0 210 C 40 200 70 230 60 300 H0Z" fill="#1b2a2a" opacity=".7"/>
+  <g stroke="#2a2142" stroke-width="7" fill="none" stroke-linecap="round">
+    <path d="M0 80 H324"/><path d="M0 170 C 110 160 200 190 324 170"/><path d="M90 0 V300"/><path d="M220 0 C 210 120 240 200 230 300"/>
+  </g>
+  <g stroke="#241c3a" stroke-width="3" fill="none">
+    <path d="M0 40 H324"/><path d="M0 125 H324"/><path d="M0 245 H324"/><path d="M40 0 V300"/><path d="M150 0 V300"/><path d="M280 0 V300"/>
+  </g>
+  <path id="rail" d="M300 22 C 250 70 215 95 190 125 S 140 185 105 215 S 45 265 18 290" fill="none" stroke="#3e3360" stroke-width="5"/>
+  <path d="M300 22 C 250 70 215 95 190 125 S 140 185 105 215 S 45 265 18 290" fill="none" stroke="#8a7cb8" stroke-width="1.5" stroke-dasharray="2 5"/>
+  <g id="stations" font-size="8.5" fill="#a99fc4" font-family="Outfit,sans-serif"></g>
+  <g id="homeMark"></g>
+  <line id="route" stroke="var(--accent)" stroke-width="2.5" stroke-dasharray="5 4" visibility="hidden"/>
+  <g id="pins"></g>
+  <g id="pinUser"><circle r="13" fill="#5aa7ff33"><animate attributeName="r" values="7;15;7" dur="2s" repeatCount="indefinite"/></circle><circle r="6" fill="#5aa7ff" stroke="#fff" stroke-width="2"/><rect x="-14" y="10" width="28" height="13" rx="6.5" fill="#5aa7ff"/><text y="20" text-anchor="middle" font-size="8.5" font-weight="700" fill="#0f0b1a" font-family="Outfit,sans-serif">You</text></g>
+`;
+const rail = document.getElementById('rail');
+const RL = rail.getTotalLength();
+const railAt = t => { const p = rail.getPointAtLength(Math.max(0,Math.min(1,t))*RL); return {x:p.x,y:p.y}; };
+const STN = {central:0.02, egmore:0.2, guindy:0.55, chromepet:0.84};
+const GUINDY = railAt(STN.guindy);
+const HOME = {x:GUINDY.x+58, y:GUINDY.y+8};
+const PLACES = [ {n:'Chennai Central',t:STN.central,dx:-74,dy:4}, {n:'Egmore',t:STN.egmore,dx:8,dy:-4}, {n:'Guindy',t:STN.guindy,dx:-38,dy:-6}, {n:'Chromepet',t:STN.chromepet,dx:10,dy:2} ];
+document.getElementById('stations').innerHTML = PLACES.map(p=>{const q=railAt(p.t);return `<circle cx="${q.x}" cy="${q.y}" r="3.2" fill="#19122b" stroke="#8a7cb8" stroke-width="1.5"/><text x="${q.x+p.dx}" y="${q.y+p.dy}">${p.n}</text>`}).join('');
+document.getElementById('homeMark').innerHTML = `<rect x="${HOME.x-11}" y="${HOME.y-11}" width="22" height="22" rx="7" fill="#2B2140" stroke="#ffffff30"/><text x="${HOME.x}" y="${HOME.y+4}" text-anchor="middle" font-size="11">🏠</text><text x="${HOME.x+15}" y="${HOME.y+3}" font-size="8.5" fill="#fff" font-family="Outfit,sans-serif">Home</text>`;
+
+const dist = (a,b) => Math.hypot(a.x-b.x, a.y-b.y);
+const fmtDist = m => m<1000 ? `${Math.round(m/10)*10} m` : `${(m/1000).toFixed(1)} km`;
+const lerp = (a,b,k) => ({x:a.x+(b.x-a.x)*k, y:a.y+(b.y-a.y)*k});
+const lerpN = (a,b,k) => a+(b-a)*k;
+const easeIO = k => k<.5 ? 2*k*k : 1-Math.pow(-2*k+2,2)/2;
+
+/* GPS gives a PLACE, never a room */
+function nearestPlace(pt){
+  if (dist(pt,HOME) < 14) return 'At Home';
+  let best=null,bd=1e9; PLACES.forEach(p=>{const d=dist(pt,railAt(p.t)); if(d<bd){bd=d;best=p}});
+  return bd<10 ? `At ${best.n} station` : `Near ${best.n}`;
+}
+
+/* ---------------- device model ----------------
+   where: 'docked' = sitting in the case (the case knows this from its charging contacts)
+          'phone'  = connected to the phone over Bluetooth, not in the case
+          'free'   = on its own (dropped)
+   indoor: how far away it is inside the same place — GPS cannot see this, only Bluetooth signal can */
+function posOf(id){
+  if (id==='case') return S.caseFollow ? S.user : (S.caseXY || railAt(S.caseT));
+  const d=S.dev[id];
+  if (d.where==='docked') return posOf('case');
+  if (d.where==='phone') return S.user;
+  return d.pos;
+}
+function indoorOf(id){
+  if (id==='case') return S.dev.case.indoor;
+  const d=S.dev[id];
+  return d.where==='docked' ? indoorOf('case') : d.where==='phone' ? 0.6 : d.indoor;
+}
+const mapM = id => dist(S.user,posOf(id))*M_PER_UNIT;
+const effM = id => Math.max(mapM(id), indoorOf(id));
+const stateOf = id => (id==='case' || S.dev[id].where==='docked') ? S.dev.case.state : 'live';
+
+/* Bluetooth signal → a rough band only */
+function prox(id){
+  if (stateOf(id)==='last') return {band:'No signal', short:'No signal', bars:0, inRange:false};
+  const m = effM(id);
+  if (m<=1.5) return {band:'Very close', short:'Very close', bars:4, inRange:true};
+  if (m<=4)   return {band:'Nearby', short:'Nearby', bars:3, inRange:true};
+  if (m<=8)   return {band:'Far', short:'Far', bars:2, inRange:true};
+  if (m<=BT_LIMIT) return {band:'Weak signal', short:'Weak', bars:1, inRange:true};
+  return {band:'Out of Bluetooth range', short:'Out of range', bars:0, inRange:false};
+}
+const barsHTML = n => `<span class="bars">${[1,2,3,4].map(i=>`<i class="${i<=n?'on':''}"></i>`).join('')}</span>`;
+
+function placeOf(id){
+  if (id!=='case'){
+    const w=S.dev[id].where;
+    if (w==='docked') return 'In the case';
+    if (w==='phone')  return 'Connected to your phone';
+    return nearestPlace(posOf(id));
+  }
+  if (S.dev.case.state==='last') return nearestPlace(posOf('case'));
+  if (S.moving || S.scenario==='train') return 'Moving · on the train';
+  return nearestPlace(posOf('case'));
+}
+function metaOf(id){
+  if (stateOf(id)==='last'){
+    const mins = Math.max(1,Math.round((Date.now()-S.lastSeenAt)/60000));
+    return `Last GPS fix ${mins} min ago · ${fmtDist(mapM(id))} away`;
+  }
+  const far = mapM(id) > 40 ? ` · ${fmtDist(mapM(id))} away` : '';
+  if (id!=='case'){
+    const w=S.dev[id].where;
+    if (w==='docked') return `Location from the case's GPS · ${placeOf('case')}`;
+    if (w==='phone')  return `Location from your phone · ${nearestPlace(S.user)}`;
+    return `Earbud GPS updated just now${far}`;
+  }
+  return `GPS updated just now${far}`;
+}
+const pillHTML = st => st==='live' ? '<i></i>LIVE' : '<i></i>LAST KNOWN';
+
+/* ---------------- animation ---------------- */
+let anims = [];
+function anim(dur, step, done){ const a={start:performance.now(),dur,step,done}; anims.push(a); return a; }
+function tick(now){
+  if (anims.length){
+    anims.slice().forEach(a=>{
+      const k=Math.min(1,(now-a.start)/a.dur); a.step(easeIO(k));
+      if (k>=1){ anims.splice(anims.indexOf(a),1); a.done && a.done(); }
+    });
+    checkSeparation(); renderLive();
+  }
+  requestAnimationFrame(tick);
+}
+
+/* ---------------- scenarios ---------------- */
+function budsWhere(w){ S.dev.left={where:w}; S.dev.right={where:w}; }
+function setScenario(sc){
+  anims=[]; closeNearby(); hideBanner(); stopSound();
+  Object.assign(S,{scenario:sc, nav:false, alerted:{}, dcLogged:{}, lastSeenAt:null, caseFollow:false, moving:false, caseXY:null, budSound:null, trailFrom:null});
+  S.dev.case={state:'live',indoor:1}; budsWhere('docked');
+  if (sc==='home'){ S.user={...HOME}; S.caseXY={...HOME}; S.dev.case.indoor=1; S.sel='case'; }
+  if (sc==='train'){ S.caseT=STN.egmore-.08; S.user=railAt(S.caseT); S.dev.case.indoor=.5; budsWhere('phone'); S.sel='case';
+    anim(9000, k=>{ S.caseT=lerpN(STN.egmore-.08, STN.guindy-.04, k); S.user=railAt(S.caseT); }); }
+  if (sc==='left'){ S.caseT=STN.guindy; S.trailFrom=STN.guindy; S.user={...GUINDY}; S.dev.case.indoor=.5; S.casePage=2; S.moving=true; S.sel='case';
+    anim(13000, k=>{ S.caseT=lerpN(STN.guindy, STN.chromepet+.02, k); }, ()=>{ S.moving=false; }); }
+  if (sc==='lost'){ S.user={...HOME}; S.caseT=STN.chromepet+.02; S.trailFrom=STN.guindy; S.dev.case.state='last'; S.lastSeenAt=Date.now()-3*60000; S.casePage=2; S.sel='case';
+    pushAlert('lost','Case signal lost','Last GPS fix near Chromepet. Showing last-known location.'); }
+  if (sc==='bud'){ S.user={...GUINDY}; S.caseFollow=true; S.dev.case.indoor=.5; S.dev.right={where:'phone'};
+    S.dev.left={where:'free', pos:{...GUINDY}, indoor:6}; S.casePage=2; S.sel='left';
+    anim(7000, k=>{ S.user=lerp(GUINDY,HOME,k); }); }
+  document.querySelectorAll('.dock .sc[data-sc]').forEach(b=>b.classList.toggle('on', b.dataset.sc===sc));
+  render();
+}
+
+function checkSeparation(){
+  ['case','left','right'].forEach(id=>{
+    if (id==='case' && S.caseFollow) return;
+    if (id!=='case' && S.dev[id].where!=='free') return;
+    if (stateOf(id)==='last') return;
+    const name = DEV[id].name;
+    if (S.dcAlerts && !S.dcLogged[id] && effM(id) > BT_LIMIT){
+      S.dcLogged[id]=true;
+      pushAlert('dc', `${name} disconnected`, 'Bluetooth link dropped. GPS keeps reporting its location.');
+    }
+    if (S.antiTheft && !S.alerted[id] && mapM(id) > S.alertDist){
+      S.alerted[id]=true;
+      if (id==='case'){
+        pushAlert('theft','Case left behind!','Your Auraloc case, with both earbuds inside, is moving away from you on the train.');
+        showBanner('Auraloc case left behind','Earbuds inside · moving away on the train · tap to track', id);
+      } else {
+        pushAlert('theft', `${name} left behind!`, `Last reported at ${placeOf(id)}.`);
+        showBanner(`${name} left behind`, `${placeOf(id)} · tap to find it`, id);
+      }
+      buzz();
+    }
+  });
+}
+
+/* ---------------- render ---------------- */
+function render(){
+  document.body.dataset.color = S.color;
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('on', t.id==='tab-'+S.tab));
+  document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('on', b.dataset.tab===S.tab));
+  if (S.tab==='alerts') S.unread=false;
+  document.getElementById('alertDot').classList.toggle('on', S.unread);
+  ['appSwatches','dockSwatches'].forEach(id=>{
+    document.getElementById(id).innerHTML = Object.entries(COLORS).map(([k,c])=>`<button class="sw ${k===S.color?'on':''}" style="background:${c.hex}" title="${c.name}" onclick="setColor('${k}')"></button>`).join('');
+  });
+  document.getElementById('batts').innerHTML = [['L',DEV.left.batt],['Case',DEV.case.batt],['R',DEV.right.batt]].map(([l,v])=>`<div class="batt"><div class="ring" style="background:conic-gradient(var(--accent) ${v*3.6}deg,#ffffff18 0)"><span>${v}</span></div><span>${l}</span></div>`).join('');
+  document.querySelectorAll('#ancSeg button').forEach(b=>b.classList.toggle('on', b.dataset.anc===S.anc));
+  document.getElementById('cAnc').textContent = {anc:'Noise cancelling',amb:'Ambient',off:'Off'}[S.anc];
+  document.getElementById('tSpatial').classList.toggle('on', S.spatial);
+  document.getElementById('cSpatial').textContent = S.spatial ? 'On' : 'Off';
+  document.getElementById('tAT').classList.toggle('on', S.antiTheft);
+  document.getElementById('tDC').classList.toggle('on', S.dcAlerts);
+  document.getElementById('qaAT').textContent = S.antiTheft ? 'Anti-theft on' : 'Anti-theft off';
+  document.getElementById('cAT').textContent = S.antiTheft ? 'On' : 'Off';
+  document.getElementById('cTheme').textContent = COLORS[S.color].name;
+  document.getElementById('distLbl').textContent = S.alertDist+' m';
+  document.querySelectorAll('#chips button').forEach(b=>b.classList.toggle('on', b.dataset.dev===S.sel));
+  renderMusic();
+  document.getElementById('alertList').innerHTML = S.alerts.length ? S.alerts.map(a=>`
+    <div class="card alert-item"><div class="alert-ic" style="background:${a.color}22;color:${a.color}">${ic(a.icon,18)}</div>
+    <div style="flex:1"><div class="t">${a.t}</div><div class="b">${a.b}</div></div><div class="when">${a.when}</div></div>`).join('')
+    : `<div class="card sub" style="text-align:center;padding:30px">No alerts yet.</div>`;
+  document.getElementById('cpages').style.transform = `translateX(${-S.casePage*100}%)`;
+  document.getElementById('cdots').innerHTML = [0,1,2,3,4].map(i=>`<i class="${i===S.casePage?'on':''}" onclick="caseGo(${i})"></i>`).join('');
+  renderLive();
+}
+
+function renderLive(){
+  const pc = prox('case');
+  // home: case card
+  const hp=document.getElementById('homeCasePill'); hp.className='pill '+stateOf('case'); hp.innerHTML=pillHTML(stateOf('case'));
+  document.getElementById('homeCasePlace').textContent = placeOf('case');
+  document.getElementById('homeCaseProx').innerHTML = barsHTML(pc.bars) + 'Bluetooth: ' + pc.band;
+  document.getElementById('homeCaseMeta').innerHTML = ic('gps',15) + metaOf('case');
+  // find card
+  const id=S.sel, p=prox(id), st=stateOf(id);
+  document.getElementById('fName').textContent = `${DEV[id].name} · ${DEV[id].batt}%`;
+  const fp=document.getElementById('fPill'); fp.className='pill '+st; fp.innerHTML=pillHTML(st);
+  document.getElementById('fPlace').textContent = placeOf(id);
+  document.getElementById('fProx').innerHTML = barsHTML(p.bars) + 'Bluetooth: ' + p.band;
+  document.getElementById('fMeta').innerHTML = ic('gps',15) + metaOf(id);
+  document.getElementById('fYou').textContent = mapM(id) > 40 ? `Your phone: ${nearestPlace(S.user)}` : '';
+  const pri = primaryKind(id);
+  document.getElementById('priIc').innerHTML = ic(pri==='nearby'?'radar':'nav',18);
+  const m = mapM(id), walk = m < 2500;
+  document.getElementById('navLbl').textContent = pri==='nearby' ? 'Find nearby'
+    : S.nav ? `${fmtDist(m)} · ~${Math.max(1,Math.round(m/(walk?80:350)))} min ${walk?'walk':'drive'}` : 'Navigate';
+  renderPins();
+  // case FindOne page
+  document.getElementById('cfPhone').textContent = pc.short;
+  ['left','right'].forEach(b=>{
+    const w=S.dev[b].where;
+    let t='In case';
+    if (w==='phone') t = S.caseFollow || effM('case')<=BT_LIMIT ? 'Connected' : 'Not in range';
+    if (w==='free') t = dist(posOf('case'),posOf(b))*M_PER_UNIT + S.dev[b].indoor <= BT_LIMIT ? 'Weak signal' : 'Not in range';
+    document.getElementById('cf'+(b==='left'?'Left':'Right')).textContent = t;
+  });
+  document.getElementById('cfLoc').textContent = 'GPS · ' + (S.dev.case.state==='last' ? 'signal weak' : placeOf('case'));
+  document.getElementById('cAlert').classList.toggle('on', !!S.alerted.case && S.scenario==='left' && !S.sound && !S.nearby);
+  renderNearby();
+}
+
+/* map markers: a round device badge on a short stem — the stem's foot is the exact spot */
+function caseMarker(x,y,fill){
+  return `<g transform="translate(${x},${y})">
+    <circle r="2.6" fill="${fill}" stroke="#fff" stroke-width="1"/><line y1="-2" y2="-9" stroke="#fff" stroke-width="1.6"/>
+    <circle cy="-22" r="13.5" fill="${fill}" stroke="#fff" stroke-width="2"/>
+    <rect x="-7.5" y="-29" width="15" height="13.5" rx="4" fill="#120d1f"/>
+    <line x1="-7.5" x2="7.5" y1="-25.2" y2="-25.2" stroke="${fill}" stroke-width="1.1"/>
+    <rect x="-4.6" y="-23.4" width="9.2" height="5.4" rx="1.3" fill="${fill}"/>
+  </g>`;
+}
+function budMarker(x,y,fill,side){
+  const flip = side==='right' ? ' transform="scale(-1,1)"' : '';
+  return `<g transform="translate(${x},${y})">
+    <circle r="2.6" fill="${fill}" stroke="#fff" stroke-width="1"/><line y1="-2" y2="-9" stroke="#fff" stroke-width="1.6"/>
+    <circle cy="-22" r="13" fill="${fill}" stroke="#fff" stroke-width="2"/>
+    <g${flip}><circle cx="-2.4" cy="-25.5" r="4.6" fill="#120d1f"/><rect x="-0.2" y="-25" width="3.6" height="10.5" rx="1.8" fill="#120d1f"/></g>
+    <circle cx="10.5" cy="-32" r="6" fill="#fff"/>
+    <text x="10.5" y="-29" text-anchor="middle" font-size="8.5" font-weight="700" fill="#120d1f" font-family="Outfit,sans-serif">${side==='left'?'L':'R'}</text>
+  </g>`;
+}
+function renderPins(){
+  const cp=posOf('case'), cs=stateOf('case');
+  const col = st => st==='live' ? 'var(--live)' : 'var(--last)';
+  const selPos = posOf(S.sel);
+  let h = '';
+  if (S.trailFrom!=null && !S.caseXY && !S.caseFollow){
+    const pts=[]; for (let t=S.trailFrom; t<S.caseT; t+=0.01){ const q=railAt(t); pts.push(`${q.x},${q.y}`); } pts.push(`${cp.x},${cp.y}`);
+    h += `<polyline points="${pts.join(' ')}" fill="none" stroke="${col(cs)}" stroke-width="3.5" stroke-linecap="round" opacity=".55"/>`;
+  }
+  if (cs==='last') h += `<circle cx="${cp.x}" cy="${cp.y}" r="22" fill="#f5b94218" stroke="#f5b94266" stroke-dasharray="3 3"/>`;
+  // highlight ring around the selected device's badge (or around "You" when that earbud is with your phone)
+  const selOnPhone = S.sel!=='case' && S.dev[S.sel].where==='phone';
+  h += selOnPhone ? `<circle cx="${selPos.x}" cy="${selPos.y}" r="16" fill="none" stroke="var(--accent)" stroke-width="2"/>`
+                  : `<circle cx="${selPos.x}" cy="${selPos.y-22}" r="18" fill="none" stroke="var(--accent)" stroke-width="2.2"/>`;
+  h += caseMarker(cp.x, cp.y, col(cs));
+  ['left','right'].forEach(b=>{
+    if (S.dev[b].where!=='free') return;
+    const q=posOf(b);
+    if (S.budSound===b) h += `<circle cx="${q.x}" cy="${q.y-22}" r="12" fill="none" stroke="var(--accent)" stroke-width="2"><animate attributeName="r" values="13;28" dur="1s" repeatCount="indefinite"/><animate attributeName="opacity" values="1;0" dur="1s" repeatCount="indefinite"/></circle>`;
+    h += budMarker(q.x, q.y, col('live'), b);
+  });
+  document.getElementById('pins').innerHTML = h;
+  document.getElementById('pinUser').setAttribute('transform', `translate(${S.user.x},${S.user.y})`);
+  const route=document.getElementById('route');
+  if (S.nav && mapM(S.sel)>15){ route.setAttribute('x1',S.user.x); route.setAttribute('y1',S.user.y); route.setAttribute('x2',selPos.x); route.setAttribute('y2',selPos.y); route.setAttribute('visibility','visible'); }
+  else route.setAttribute('visibility','hidden');
+}
+
+function renderMusic(){
+  const tr = TRACKS[S.track];
+  ['pSong','cSong'].forEach(id=>document.getElementById(id).textContent=tr.t);
+  ['pArtist','cArtist'].forEach(id=>document.getElementById(id).textContent=tr.a);
+  ['pProg','cProg'].forEach(id=>document.getElementById(id).style.width=(S.pos/tr.d*100)+'%');
+  ['pPlay','cPlay'].forEach(id=>document.getElementById(id).innerHTML = ic(S.playing?'pause':'play', id==='cPlay'?16:20));
+}
+
+/* ---------------- find: navigate / nearby / sound ---------------- */
+const primaryKind = id => prox(id).inRange ? 'nearby' : 'navigate';
+function primaryAction(){ primaryKind(S.sel)==='nearby' ? openNearby(S.sel) : navigate(); }
+function navigate(){
+  const id=S.sel;
+  S.nav=!S.nav;
+  // earbud scenario: walking back along the route to where it was dropped
+  if (S.nav && S.scenario==='bud' && id==='left' && S.dev.left.where==='free'){
+    const from={...S.user}, to={...posOf('left')};
+    anim(6000, k=>{ S.user=lerp(from,to,k); }, ()=>{ S.nav=false; toast('You are there · now use Find nearby'); renderLive(); });
+  }
+  renderLive();
+}
+function nearbyTarget(id){
+  if (id==='case' || S.dev[id].where==='docked') return S.dev.case;
+  return S.dev[id].where==='free' ? S.dev[id] : null;
+}
+function openNearby(id){
+  S.nav=false; S.nearby={id};
+  document.getElementById('nearby').classList.add('on');
+  const onCase = id==='case' || S.dev[id].where==='docked';
+  document.getElementById('cHere').classList.toggle('on', onCase);
+  const obj=nearbyTarget(id);
+  if (obj && obj.indoor>1.2){
+    const from=obj.indoor;
+    S.nearby.walk = anim(10000, k=>{ obj.indoor=lerpN(from,0.8,k); });
+  }
+  renderLive();
+}
+function closeNearby(){
+  if (S.nearby && S.nearby.walk){ const i=anims.indexOf(S.nearby.walk); if(i>=0) anims.splice(i,1); }
+  S.nearby=null;
+  document.getElementById('nearby').classList.remove('on');
+  document.getElementById('cHere').classList.remove('on');
+}
+function renderNearby(){
+  if (!S.nearby) return;
+  const id=S.nearby.id, p=prox(id);
+  document.getElementById('nbName').textContent = 'Find nearby · ' + DEV[id].name;
+  document.getElementById('nbPlace').textContent = 'GPS: ' + (id==='case'||S.dev[id].where==='docked' ? placeOf('case') : nearestPlace(posOf(id)));
+  document.querySelectorAll('#nbMeter i').forEach((el,i)=>el.classList.toggle('on', i<p.bars));
+  document.getElementById('nbBand').textContent = p.band;
+  const d = effM(id);
+  document.getElementById('nbHint').textContent = !p.inRange ? 'Not in Bluetooth range' : d < 1 ? 'Less than 1 m away' : `About ${Math.round(d)} m away`;
+}
+function playSound(id=S.sel){
+  if (stateOf(id)==='last'){ toast('Unreachable · it will ring when back online'); return; }
+  const onCase = id==='case' || S.dev[id].where==='docked';
+  if (onCase){
+    S.sound=true; document.getElementById('cSound').classList.add('on');
+    const cs=document.getElementById('case'); cs.classList.remove('shake'); void cs.offsetWidth; cs.classList.add('shake');
+    toast('Playing sound on your case'); clearTimeout(S._snd); S._snd=setTimeout(stopSound,5000); renderLive(); return;
+  }
+  if (!prox(id).inRange){ toast(`${DEV[id].name} is out of Bluetooth range · get closer first`); return; }
+  S.budSound=id; toast(`Playing sound on ${DEV[id].name}`); clearTimeout(S._bsnd); S._bsnd=setTimeout(()=>{S.budSound=null; renderLive();},4000); renderLive();
+}
+function stopSound(){ S.sound=false; document.getElementById('cSound').classList.remove('on'); }
+
+/* ---------------- misc actions ---------------- */
+function goTab(t){ S.tab=t; render(); }
+function setColor(c){ S.color=c; render(); }
+function cycleColor(){ const k=Object.keys(COLORS); setColor(k[(k.indexOf(S.color)+1)%k.length]); }
+function togglePlay(){ S.playing=!S.playing; renderMusic(); }
+function skip(n){ S.track=(S.track+n+TRACKS.length)%TRACKS.length; S.pos=0; renderMusic(); }
+function cycleAnc(){ const o=['anc','amb','off']; S.anc=o[(o.indexOf(S.anc)+1)%3]; render(); }
+function toggleSpatial(){ S.spatial=!S.spatial; toast(S.spatial?'Spatial audio on':'Spatial audio off'); render(); }
+function toggleAntiTheft(){ S.antiTheft=!S.antiTheft; toast(S.antiTheft?'Anti-theft alert on':'Anti-theft alert off'); render(); }
+function caseGo(i){ S.casePage=i; caseSettings(false); render(); }
+function caseSettings(on){ document.getElementById('cSettings').classList.toggle('on', on); }
+function buzz(){ const p=document.getElementById('phone'); p.classList.remove('buzz'); void p.offsetWidth; p.classList.add('buzz'); }
+function ringPhone(){ buzz(); toast('Your case is ringing this phone'); }
+
+function pushAlert(kind,t,b){
+  const k={theft:['shield','#ff5d73'],dc:['unlink','#f5b942'],lost:['signal','#f5b942'],info:['bell','#a99fc4']}[kind];
+  S.alerts.unshift({t,b,icon:k[0],color:k[1],when:clock(new Date())});
+  if (S.tab!=='alerts') S.unread=true;
+  render();
+}
+let bannerTimer;
+function showBanner(t,b,dev){
+  document.getElementById('bannerT').textContent=t; document.getElementById('bannerB').textContent=b;
+  document.getElementById('bannerIc').innerHTML=ic('shield',20);
+  const el=document.getElementById('banner'); el.dataset.dev=dev; el.classList.add('on');
+  clearTimeout(bannerTimer); bannerTimer=setTimeout(hideBanner,7000);
+}
+function hideBanner(){ document.getElementById('banner').classList.remove('on'); }
+document.getElementById('banner').onclick=e=>{ hideBanner(); S.sel=e.currentTarget.dataset.dev||'case'; S.tab='find'; render(); };
+let toastTimer;
+function toast(m){ const t=document.getElementById('toast'); t.textContent=m; t.classList.add('on'); clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('on'),2400); }
+
+
+/* assistant (roadmap · phone-linked) */
+const ASK = [
+  { q:'Remind me to charge my case at 9 PM', a:()=>'Reminder set for 9:00 PM today: "Charge Auraloc case". I\'ll say it in your earbuds.' },
+  { q:'Find my case', a:()=>{ const p=prox('case'); return `Your case is ${placeOf('case').replace(/^At /,'at ')} · Bluetooth: ${p.band.toLowerCase()}.` + (p.inRange?' Opening Find nearby…':' Opening the map…'); },
+    then:()=>{ closeAssistant(); S.sel='case'; S.tab='find'; render(); if (prox('case').inRange) openNearby('case'); } },
+  { q:'Play some music', a:()=>`Playing ${TRACKS[S.track].t} by ${TRACKS[S.track].a}.`, then:()=>{ S.playing=true; renderMusic(); } },
+];
+function openAssistant(){ document.getElementById('assistant').classList.add('on'); document.getElementById('chat').innerHTML=''; document.getElementById('micHint').textContent='Tap a command or the mic'; }
+function closeAssistant(){ document.getElementById('assistant').classList.remove('on'); }
+function runAssistant(n){
+  const c=ASK[n], mic=document.getElementById('micBtn'), chat=document.getElementById('chat'), hint=document.getElementById('micHint');
+  mic.classList.add('listen'); hint.textContent='Listening…';
+  let i=0; chat.innerHTML='<div class="bubble me" id="qb"></div>';
+  const iv=setInterval(()=>{ document.getElementById('qb').textContent=c.q.slice(0,++i); if(i>=c.q.length){ clearInterval(iv); mic.classList.remove('listen'); hint.textContent='Done';
+    setTimeout(()=>{ chat.insertAdjacentHTML('beforeend',`<div class="bubble ai">${c.a()}</div>`); if (c.then) setTimeout(c.then,1400); },500); } },40);
+}
+
+/* calculator */
+const KEYS=['C','±','%','÷','7','8','9','×','4','5','6','−','1','2','3','+','0','.','⌫','='];
+document.getElementById('calcKeys').innerHTML = KEYS.map(k=>`<button class="${'÷×−+='.includes(k)?'op':''}" onclick="calcKey('${k}')">${k}</button>`).join('');
+function calcKey(k){
+  let s=S.calc;
+  if (k==='C') s='0';
+  else if (k==='⌫') s=s.length>1?s.slice(0,-1):'0';
+  else if (k==='=') { try{ const v=Function('"use strict";return ('+s.replace(/×/g,'*').replace(/÷/g,'/').replace(/−/g,'-').replace(/%/g,'/100')+')')(); s=String(+v.toFixed(8)); }catch(e){ s='Error'; } }
+  else if (k==='±') s = s.startsWith('-')? s.slice(1) : '-'+s;
+  else s = (s==='0'||s==='Error') && !'÷×−+%.'.includes(k) ? k : s+k;
+  S.calc=s; document.getElementById('calcDisp').textContent=s;
+}
+
+/* calendar */
+function renderCal(){
+  const d=new Date(), y=d.getFullYear(), m=d.getMonth();
+  document.getElementById('cCalTitle').textContent=d.toLocaleString('en-IN',{month:'long',year:'numeric'});
+  const first=(new Date(y,m,1).getDay()+6)%7, days=new Date(y,m+1,0).getDate();
+  let h='MTWTFSS'.split('').map(x=>`<b>${x}</b>`).join('');
+  for(let i=0;i<first;i++) h+='<span></span>';
+  for(let i=1;i<=days;i++) h+=`<span class="${i===d.getDate()?'today':''}">${i}</span>`;
+  document.getElementById('cCal').innerHTML=h;
+}
+
+/* clock */
+const clock = d => d.toLocaleTimeString('en-IN',{hour:'numeric',minute:'2-digit',hour12:false});
+function tickClock(){
+  const d=new Date(), t=clock(d);
+  ['sbTime','cTime','miniTime'].forEach(id=>document.getElementById(id).textContent=t);
+  document.getElementById('cDate').textContent=d.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'});
+  document.getElementById('sbRight').innerHTML = ic('signal',15)+ic('wifi',15)+ic('batt',20);
+  if (S.playing){ S.pos+=1; if (S.pos>=TRACKS[S.track].d) skip(1); else renderMusic(); }
+  if (S.scenario==='lost') renderLive();
+}
+
+/* ---------------- wiring ---------------- */
+document.querySelectorAll('#nav button').forEach(b=>b.onclick=()=>goTab(b.dataset.tab));
+document.querySelectorAll('#chips button').forEach(b=>b.onclick=()=>{ S.sel=b.dataset.dev; S.nav=false; render(); });
+document.querySelectorAll('#ancSeg button').forEach(b=>b.onclick=()=>{ S.anc=b.dataset.anc; render(); });
+document.querySelectorAll('.dock .sc[data-sc]').forEach(b=>b.onclick=()=>setScenario(b.dataset.sc));
+document.getElementById('distRange').oninput=e=>{ S.alertDist=+e.target.value; render(); };
+const SC_KEYS = {'1':'home','2':'train','3':'left','4':'lost','5':'bud'};
+document.addEventListener('keydown',e=>{
+  const t=e.target, k=e.key.toLowerCase();
+  if (t.tagName==='INPUT' && t.type!=='range') return;      // typing in a text field
+  if (t.type==='range' && k.startsWith('arrow')) return;    // arrows still move the slider
+  if (t.blur && t!==document.body) t.blur();                // shortcuts keep working after touching a control
+  if (SC_KEYS[k]) setScenario(SC_KEYS[k]);
+  if (k==='t') cycleColor();
+  if (k==='escape') closeNearby();
+  if (k==='arrowright') caseGo(Math.min(4,S.casePage+1));
+  if (k==='arrowleft') caseGo(Math.max(0,S.casePage-1));
+});
+(()=>{ const el=document.getElementById('cscreen'); let x0=null;
+  el.addEventListener('pointerdown',e=>{x0=e.clientX});
+  el.addEventListener('pointerup',e=>{ if(x0===null) return; const dx=e.clientX-x0; x0=null;
+    if (Math.abs(dx)>40) caseGo(Math.max(0,Math.min(4,S.casePage+(dx<0?1:-1)))); });
+})();
+
+paintIcons(); renderCal(); tickClock(); setInterval(tickClock,1000);
+const q = new URLSearchParams(location.search);
+if (q.get('color')) S.color=q.get('color');
+setScenario(Object.values(SC_KEYS).includes(location.hash.slice(1)) ? location.hash.slice(1) : 'home');
+if (q.get('tab')) goTab(q.get('tab'));
+requestAnimationFrame(tick);
+</script>
+</body>
+</html>
