@@ -223,6 +223,38 @@ input[type=range]{width:100%;accent-color:var(--accent)}
 .gpsline{display:flex;align-items:center}
 .gpsline svg{flex:none;margin:0 7px 0 1px;color:var(--accent)}
 @media (max-width:1600px){.foot{display:none}}
+/* ================= phone screens: the visitor's phone IS the frame ================= */
+.mswitch,.badge-sim .s{display:none}
+@media (max-width:600px){
+  html,body{height:100%;overflow-x:hidden}
+  body{height:100vh;height:100dvh;display:flex;flex-direction:column;overflow:hidden}
+  .topbar{order:0;padding:10px 16px 8px;gap:8px;flex-wrap:wrap}
+  .brand .logo{font-size:24px}
+  .brand .tag{display:none}
+  .mswitch{display:flex;order:1;margin-left:auto;background:#1E1530;border:1px solid #ffffff14;border-radius:12px;padding:3px;gap:3px}
+  .mswitch button{font-size:13px;padding:6px 16px;border-radius:9px;color:var(--muted)}
+  .mswitch button.on{background:var(--accent);color:#120d1f;font-weight:600}
+  .badge-sim{order:2;width:100%;text-align:center;font-size:11px;padding:4px 10px}
+  .badge-sim .l{display:none}.badge-sim .s{display:inline}
+  /* scenarios: a swipeable chip row under the header, never over the content */
+  .dock{order:1;position:static;transform:none;left:auto;bottom:auto;max-width:none;width:100%;border-radius:0;border-width:1px 0;
+        box-shadow:none;padding:8px 16px;gap:8px;flex-wrap:nowrap!important;justify-content:flex-start;overflow-x:auto;scrollbar-width:none;flex:none}
+  .dock::-webkit-scrollbar{display:none}
+  .dock .grp{flex:none}
+  .dock .sc{font-size:12px;padding:7px 10px}
+  .stage{order:2;flex:1;min-height:0;padding:0;gap:0;display:block;overflow:hidden}
+  .col{height:100%;gap:0}
+  .col-label,.case-hint{display:none}
+  body[data-mview="app"] .col-case,body[data-mview="case"] .col-phone{display:none}
+  .phone,.phone.buzz{width:100%;height:100%;border-radius:0;padding:0;background:none;box-shadow:none;transform:none;margin:0}
+  .screen{border-radius:0}
+  .statusbar{display:none}
+  .banner{top:8px}
+  .case-stage{width:100%;height:100%;border-radius:0;display:flex;align-items:center;justify-content:center;overflow:hidden}
+  .case{flex:none}
+}
+@media (max-width:360px){ .case{transform:scale(.86)} }
+
 
 /* find nearby sheet */
 .meter{display:flex;justify-content:center;align-items:flex-end;gap:8px;height:110px;margin:18px 0 10px}
@@ -243,16 +275,17 @@ input[type=range]{width:100%;accent-color:var(--accent)}
 @keyframes flash{50%{background:#fff;color:#120d1f}}
 </style>
 </head>
-<body data-color="lavender">
+<body data-color="lavender" data-mview="app">
 
 <header class="topbar">
   <div class="brand"><span class="logo">Auraloc</span><span class="tag">Earpods + FindOne App</span></div>
-  <span class="badge-sim">UI concept demo · all locations are simulated, not live GPS</span>
+  <div class="mswitch" id="mswitch"><button data-v="app" class="on">App</button><button data-v="case">Case</button></div>
+  <span class="badge-sim"><span class="l">UI concept demo · all locations are simulated, not live GPS</span><span class="s">Simulated demo · not live GPS</span></span>
 </header>
 
 <main class="stage">
   <!-- ================= PHONE ================= -->
-  <section class="col">
+  <section class="col col-phone">
     <div class="col-label">FindOne app</div>
     <div class="phone" id="phone">
       <div class="screen">
@@ -402,7 +435,7 @@ input[type=range]{width:100%;accent-color:var(--accent)}
   </section>
 
   <!-- ================= CASE ================= -->
-  <section class="col">
+  <section class="col col-case">
     <div class="col-label">Touchscreen case</div>
     <div class="case-stage">
       <div class="case" id="case">
@@ -998,6 +1031,7 @@ document.addEventListener('keydown',e=>{
     if (Math.abs(dx)>40) caseGo(Math.max(0,Math.min(4,S.casePage+(dx<0?1:-1)))); });
 })();
 
+document.querySelectorAll('#mswitch button').forEach(b=>b.onclick=()=>{ document.body.dataset.mview=b.dataset.v; document.querySelectorAll('#mswitch button').forEach(x=>x.classList.toggle('on', x===b)); });
 paintIcons(); renderCal(); tickClock(); setInterval(tickClock,1000);
 const q = new URLSearchParams(location.search);
 if (q.get('color')) S.color=q.get('color');
